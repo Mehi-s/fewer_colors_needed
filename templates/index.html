@@ -1,0 +1,464 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Image Compressor Pro</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            primary: '#1e40af',
+            secondary: '#374151',
+            accent: '#0f172a',
+            success: '#059669',
+            warning: '#d97706',
+            dark: '#0f172a'
+          },
+          animation: {
+            'fade-in': 'fadeIn 0.6s ease-in-out',
+            'slide-up': 'slideUp 0.8s ease-out',
+            'pulse-slow': 'pulse 3s infinite',
+            'bounce-slow': 'bounce 2s infinite'
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    
+    @keyframes slideUp {
+      from { opacity: 0; transform: translateY(40px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .glass {
+      background: rgba(255, 255, 255, 0.05);
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .gradient-text {
+      background: linear-gradient(135deg, #1e40af 0%, #374151 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .file-input {
+      display: none;
+    }
+
+    .file-input-label {
+      display: inline-block;
+      background: linear-gradient(135deg, #1e40af 0%, #374151 100%);
+      border: none;
+      border-radius: 8px;
+      padding: 12px 24px;
+      outline: none;
+      white-space: nowrap;
+      user-select: none;
+      cursor: pointer;
+      color: white;
+      font-weight: 600;
+      font-size: 14px;
+      transition: all 0.3s ease;
+    }
+
+    .file-input-label:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 25px rgba(30, 64, 175, 0.3);
+    }
+
+    .drag-area {
+      border: 2px dashed #6b7280;
+      transition: all 0.3s ease;
+    }
+
+    .drag-area.dragover {
+      border-color: #1e40af;
+      background: rgba(30, 64, 175, 0.05);
+      transform: scale(1.02);
+    }
+
+    .result-card {
+      transition: all 0.3s ease;
+      transform: translateY(0);
+    }
+
+    .result-card:hover {
+      transform: translateY(-8px);
+      box-shadow: 0 25px 50px rgba(0, 0, 0, 0.15);
+    }
+
+    .floating-icon {
+      animation: float 3s ease-in-out infinite;
+    }
+
+    @keyframes float {
+      0%, 100% { transform: translateY(0px); }
+      50% { transform: translateY(-10px); }
+    }
+
+    .preview-image {
+      max-width: 100%;
+      max-height: 200px;
+      border-radius: 8px;
+      border: 1px solid #374151;
+    }
+
+    .file-list {
+      max-height: 200px;
+      overflow-y: auto;
+    }
+
+    .file-item {
+      display: flex;
+      align-items: center;
+      padding: 8px 12px;
+      background: rgba(55, 65, 81, 0.3);
+      border-radius: 6px;
+      margin-bottom: 8px;
+      border: 1px solid rgba(55, 65, 81, 0.5);
+    }
+
+    .file-item:last-child {
+      margin-bottom: 0;
+    }
+  </style>
+</head>
+<body class="bg-gradient-to-br from-slate-900 via-gray-900 to-slate-900 min-h-screen relative overflow-x-hidden">
+  
+  <!-- Background Animation -->
+  <div class="absolute inset-0 overflow-hidden">
+    <div class="absolute -top-40 -right-40 w-80 h-80 bg-blue-900 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-pulse-slow"></div>
+    <div class="absolute -bottom-40 -left-40 w-80 h-80 bg-gray-800 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-pulse-slow"></div>
+    <div class="absolute top-40 left-40 w-60 h-60 bg-slate-800 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-bounce-slow"></div>
+  </div>
+
+  <div class="relative z-10 min-h-screen flex items-center justify-center p-4">
+    <div class="max-w-6xl w-full">
+      
+      <!-- Header Section -->
+      <div class="text-center mb-12 animate-fade-in">
+        <div class="floating-icon inline-block mb-6">
+          <div class="w-20 h-20 bg-gradient-to-br from-blue-800 to-gray-700 rounded-2xl flex items-center justify-center text-4xl shadow-2xl">
+            📊
+          </div>
+        </div>
+        <h1 class="text-5xl md:text-6xl font-bold gradient-text mb-4">
+          Image Compressor Pro
+        </h1>
+        <p class="text-xl text-slate-300 max-w-2xl mx-auto leading-relaxed">
+          Professional image compression with advanced algorithms. Optimize file sizes while preserving quality.
+        </p>
+      </div>
+
+      <!-- Main Content Grid -->
+      <div class="grid lg:grid-cols-2 gap-8 mb-12">
+        
+        <!-- Compress Images Section -->
+        <div class="glass rounded-3xl p-8 animate-slide-up" style="animation-delay: 0.2s;">
+          <div class="flex items-center mb-6">
+            <div class="w-12 h-12 bg-gradient-to-br from-blue-700 to-gray-600 rounded-xl flex items-center justify-center text-2xl mr-4">
+              🖼️
+            </div>
+            <h2 class="text-2xl font-bold text-white">Compress Images</h2>
+          </div>
+          
+          <form action="/compress" method="POST" enctype="multipart/form-data" class="space-y-6">
+            <!-- File Drop Area -->
+            <div class="drag-area rounded-2xl p-8 text-center bg-slate-800/50 backdrop-blur-sm" id="imageDropArea">
+              <div class="text-4xl mb-4">📂</div>
+              <input type="file" name="image" accept="image/*" multiple required
+                class="file-input" id="imageInput" />
+              <label for="imageInput" class="file-input-label">Choose Images</label>
+              <p class="text-slate-300 mt-2">Or drag and drop your images here</p>
+              <p class="text-sm text-slate-400 mt-1">Supports JPG, PNG, WebP formats</p>
+              
+              <!-- Preview Area -->
+              <div id="imagePreview" class="mt-6 hidden">
+                <div class="file-list" id="imageFileList"></div>
+              </div>
+            </div>
+
+            <!-- Color Input -->
+            <div class="relative">
+              <label class="block text-sm font-medium text-slate-200 mb-2">
+                Number of Colors
+              </label>
+              <input type="number" name="n_colors" min="2" max="65536" required 
+                placeholder="e.g., 256" value="16"
+                class="w-full px-4 py-3 bg-slate-800/50 border border-slate-600 rounded-xl text-white placeholder-slate-400 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all" />
+              <div class="absolute right-3 top-9 text-slate-400">
+                🎨
+              </div>
+            </div>
+
+            <!-- Submit Button -->
+            <button type="submit"
+              class="w-full bg-gradient-to-r from-blue-700 to-gray-700 text-white font-bold py-4 px-6 rounded-xl hover:from-blue-800 hover:to-gray-800 transform hover:scale-105 transition-all duration-200 shadow-lg hover:shadow-xl">
+              <span class="flex items-center justify-center">
+                <span class="mr-2">⚡</span>
+                Compress Images
+              </span>
+            </button>
+          </form>
+        </div>
+
+        <!-- Extract NPZ Section -->
+        <div class="glass rounded-3xl p-8 animate-slide-up" style="animation-delay: 0.4s;">
+          <div class="flex items-center mb-6">
+            <div class="w-12 h-12 bg-gradient-to-br from-gray-700 to-slate-600 rounded-xl flex items-center justify-center text-2xl mr-4">
+              📋
+            </div>
+            <h2 class="text-2xl font-bold text-white">Extract from NPZ</h2>
+          </div>
+          
+          <form action="/extract" method="POST" enctype="multipart/form-data" class="space-y-6">
+            <!-- NPZ File Drop Area -->
+            <div class="drag-area rounded-2xl p-8 text-center bg-slate-800/50 backdrop-blur-sm" id="npzDropArea">
+              <div class="text-4xl mb-4">📄</div>
+              <input type="file" name="npz_file" accept=".npz" required
+                class="file-input" id="npzInput" />
+              <label for="npzInput" class="file-input-label">Choose NPZ File</label>
+              <p class="text-slate-300 mt-2">Upload your .npz file</p>
+              <p class="text-sm text-slate-400 mt-1">Compressed NumPy archive format</p>
+              
+              <!-- NPZ Preview Area -->
+              <div id="npzPreview" class="mt-6 hidden">
+                <div class="file-list" id="npzFileList"></div>
+              </div>
+            </div>
+
+            <!-- Submit Button -->
+            <button type="submit"
+              class="w-full bg-gradient-to-r from-gray-700 to-slate-700 text-white font-bold py-4 px-6 rounded-xl hover:from-gray-800 hover:to-slate-800 transform hover:scale-105 transition-all duration-200 shadow-lg hover:shadow-xl">
+              <span class="flex items-center justify-center">
+                <span class="mr-2">🔍</span>
+                Extract Image
+              </span>
+            </button>
+          </form>
+
+          <!-- Info Section -->
+          <div class="mt-8 p-4 bg-slate-800/30 rounded-xl border border-slate-700">
+            <h3 class="text-lg font-semibold text-white mb-2">💡 How it works</h3>
+            <ul class="text-sm text-slate-300 space-y-1">
+              <li>• Upload multiple images for batch compression</li>
+              <li>• Choose color palette size (2-65536 colors)</li>
+              <li>• Download compressed PNG or NPZ files</li>
+              <li>• Extract images from existing NPZ archives</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <!-- Results Section -->
+      {% if results %}
+      <div class="glass rounded-3xl p-8 animate-slide-up" style="animation-delay: 0.6s;">
+        <div class="flex items-center justify-center mb-8">
+          <div class="w-12 h-12 bg-gradient-to-br from-green-700 to-emerald-600 rounded-xl flex items-center justify-center text-2xl mr-4">
+            ✅
+          </div>
+          <h2 class="text-3xl font-bold text-white">Processing Complete!</h2>
+        </div>
+        
+        <div class="grid gap-6 grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
+          {% for res in results %}
+          <div class="result-card bg-slate-800/50 backdrop-blur-sm rounded-2xl p-6 border border-slate-700">
+            
+            <!-- Original Image -->
+            {% if res.original %}
+            <div class="mb-4">
+              <p class="text-sm font-medium text-slate-300 mb-2 flex items-center">
+                <span class="w-2 h-2 bg-blue-500 rounded-full mr-2"></span>
+                Original
+              </p>
+              <div class="relative overflow-hidden rounded-xl">
+                <img src="{{ res.original }}" class="w-full h-40 object-cover transition-transform hover:scale-105">
+                <div class="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent"></div>
+              </div>
+            </div>
+            {% endif %}
+
+            <!-- Compressed/Extracted Image -->
+            <div class="mb-6">
+              <p class="text-sm font-medium text-slate-300 mb-2 flex items-center">
+                <span class="w-2 h-2 bg-green-500 rounded-full mr-2"></span>
+                {% if res.original %}Compressed{% else %}Extracted{% endif %}
+              </p>
+              <div class="relative overflow-hidden rounded-xl">
+                <img src="{{ res.compressed }}" class="w-full h-40 object-cover transition-transform hover:scale-105">
+                <div class="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent"></div>
+              </div>
+            </div>
+
+            <!-- Download Buttons -->
+            <div class="space-y-3">
+              {% if res.compressed %}
+              <a href="{{ res.compressed }}" download
+                class="flex items-center justify-center w-full bg-gradient-to-r from-green-700 to-emerald-700 text-white py-2 px-4 rounded-lg hover:from-green-800 hover:to-emerald-800 transition-all transform hover:scale-105 text-sm font-medium">
+                <span class="mr-2">⬇️</span>
+                Download PNG
+              </a>
+              {% endif %}
+              {% if res.npz %}
+              <a href="{{ res.npz }}" download
+                class="flex items-center justify-center w-full bg-gradient-to-r from-blue-700 to-gray-700 text-white py-2 px-4 rounded-lg hover:from-blue-800 hover:to-gray-800 transition-all transform hover:scale-105 text-sm font-medium">
+                <span class="mr-2">📦</span>
+                Download NPZ
+              </a>
+              {% endif %}
+            </div>
+          </div>
+          {% endfor %}
+        </div>
+      </div>
+      {% endif %}
+
+      <!-- Footer -->
+      <div class="text-center mt-12 text-slate-400">
+        <p class="text-sm">
+          Powered by K-means clustering and advanced compression algorithms
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // File preview functionality
+    function handleFilePreview(input, previewContainer, fileListContainer) {
+      const files = Array.from(input.files);
+      
+      if (files.length === 0) {
+        previewContainer.classList.add('hidden');
+        return;
+      }
+      
+      previewContainer.classList.remove('hidden');
+      fileListContainer.innerHTML = '';
+      
+      files.forEach((file, index) => {
+        const fileItem = document.createElement('div');
+        fileItem.className = 'file-item';
+        
+        if (file.type.startsWith('image/')) {
+          const reader = new FileReader();
+          reader.onload = function(e) {
+            fileItem.innerHTML = `
+              <img src="${e.target.result}" class="preview-image w-16 h-16 object-cover rounded mr-3" alt="Preview">
+              <div class="flex-1">
+                <p class="text-white text-sm font-medium truncate">${file.name}</p>
+                <p class="text-slate-400 text-xs">${(file.size / 1024 / 1024).toFixed(2)} MB</p>
+              </div>
+              <span class="text-green-400 text-xs">✓</span>
+            `;
+          };
+          reader.readAsDataURL(file);
+        } else {
+          fileItem.innerHTML = `
+            <div class="w-16 h-16 bg-slate-700 rounded flex items-center justify-center mr-3">
+              <span class="text-2xl">📄</span>
+            </div>
+            <div class="flex-1">
+              <p class="text-white text-sm font-medium truncate">${file.name}</p>
+              <p class="text-slate-400 text-xs">${(file.size / 1024 / 1024).toFixed(2)} MB</p>
+            </div>
+            <span class="text-green-400 text-xs">✓</span>
+          `;
+        }
+        
+        fileListContainer.appendChild(fileItem);
+      });
+    }
+
+    // Initialize file inputs
+    const imageInput = document.getElementById('imageInput');
+    const npzInput = document.getElementById('npzInput');
+    const imagePreview = document.getElementById('imagePreview');
+    const npzPreview = document.getElementById('npzPreview');
+    const imageFileList = document.getElementById('imageFileList');
+    const npzFileList = document.getElementById('npzFileList');
+
+    imageInput.addEventListener('change', function() {
+      handleFilePreview(this, imagePreview, imageFileList);
+    });
+
+    npzInput.addEventListener('change', function() {
+      handleFilePreview(this, npzPreview, npzFileList);
+    });
+
+    // Drag and drop functionality
+    const dragAreas = document.querySelectorAll('.drag-area');
+    
+    dragAreas.forEach(dragArea => {
+      const fileInput = dragArea.querySelector('input[type="file"]');
+      const previewContainer = dragArea.querySelector('[id*="Preview"]');
+      const fileListContainer = dragArea.querySelector('[id*="FileList"]');
+      
+      ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+        dragArea.addEventListener(eventName, preventDefaults, false);
+      });
+      
+      function preventDefaults(e) {
+        e.preventDefault();
+        e.stopPropagation();
+      }
+      
+      ['dragenter', 'dragover'].forEach(eventName => {
+        dragArea.addEventListener(eventName, highlight, false);
+      });
+      
+      ['dragleave', 'drop'].forEach(eventName => {
+        dragArea.addEventListener(eventName, unhighlight, false);
+      });
+      
+      function highlight(e) {
+        dragArea.classList.add('dragover');
+      }
+      
+      function unhighlight(e) {
+        dragArea.classList.remove('dragover');
+      }
+      
+      dragArea.addEventListener('drop', handleDrop, false);
+      
+      function handleDrop(e) {
+        const dt = e.dataTransfer;
+        const files = dt.files;
+        
+        fileInput.files = files;
+        
+        // Trigger change event to update preview
+        const changeEvent = new Event('change');
+        fileInput.dispatchEvent(changeEvent);
+      }
+    });
+
+    // Form submission loading states
+    const forms = document.querySelectorAll('form');
+    forms.forEach(form => {
+      form.addEventListener('submit', function(e) {
+        const submitBtn = form.querySelector('button[type="submit"]');
+        const originalText = submitBtn.innerHTML;
+        
+        submitBtn.innerHTML = '<span class="flex items-center justify-center"><span class="animate-spin mr-2">⏳</span>Processing...</span>';
+        submitBtn.disabled = true;
+        
+        // Reset after 30 seconds as fallback
+        setTimeout(() => {
+          submitBtn.innerHTML = originalText;
+          submitBtn.disabled = false;
+        }, 30000);
+      });
+    });
+  </script>
+</body>
+</html>
