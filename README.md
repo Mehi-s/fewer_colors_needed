@@ -108,3 +108,7 @@ The application provides the following endpoints:
 ## Docker Hub Link
 The pre-built Docker image can be found on Docker Hub:
 [https://hub.docker.com/repository/docker/mehrdads72/fewer_colors_needed](https://hub.docker.com/repository/docker/mehrdads72/fewer_colors_needed)
+
+## AI usage
+Html and README files is AI-generated
+
